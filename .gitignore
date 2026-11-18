@@ -1,0 +1,188 @@
+#
+# NOTE! Don't add files that are generated in specific
+# subdirectories here. Add them in the ".gitignore" file
+# in that subdirectory instead.
+#
+# Normal rules (sorted alphabetically)
+#
+.*
+*.a
+*.bin
+*.bz2
+*.c.[012]*.*
+*.dtb
+*.dtb.S
+*.dtbo
+*.dwo
+*.elf
+*.gcno
+*.gz
+*.i
+*.ko
+*.ll
+*.lex.c
+*.lst
+*.lz4
+*.lzma
+*.lzo
+*.mod.c
+*.o
+*.o.*
+*.order
+*.patch
+*.s
+*.so
+*.so.dbg
+*.su
+*.symtypes
+*.tab.[ch]
+*.tar
+*.xz
+Module.symvers
+modules.builtin
+
+#
+# Top-level generic files
+#
+/tags
+/TAGS
+/linux
+/vmlinux
+/vmlinux.32
+/vmlinux-gdb.py
+/vmlinuz
+/System.map
+/Module.markers
+
+#
+# RPM spec file (make rpm-pkg)
+#
+/*.spec
+
+#
+# Debian directory (make deb-pkg)
+#
+/debian/
+
+#
+# tar directory (make tar*-pkg)
+#
+/tar-install/
+
+#
+# git files that we don't want to ignore even if they are dot-files
+#
+!.gitignore
+!.mailmap
+
+#
+# Generated include files
+#
+include/config
+include/generated
+arch/*/include/generated
+
+# stgit generated dirs
+patches-*
+
+# quilt's files
+patches
+series
+
+# cscope files
+cscope.*
+ncscope.*
+
+# gnu global files
+GPATH
+GRTAGS
+GSYMS
+GTAGS
+
+# id-utils files
+ID
+
+*.orig
+*~
+\#*#
+
+#
+# Leavings from module signing
+#
+extra_certificates
+signing_key.pem
+signing_key.priv
+signing_key.x509
+x509.genkey
+
+# Kconfig presets
+all.config
+
+# Kdevelop4
+*.kdev4
+
+# Clang's compilation database file
+/compile_commands.json
+
+#
+# Keep the committed OC build artifacts (force-tracked under oc-build/)
+#
+!oc-build/*.dtb
+!oc-build/*.gz
+!oc-build/Image
+
+#
+# Additional generated build artifacts (this tree ships no per-dir .gitignore)
+#
+*-asn1.c
+*-asn1.h
+*.gen.S
+*.reverse.dts
+*.pyc
+__pycache__/
+
+# bare kernel Image under arch boot (oc-build/Image stays tracked via !oc-build/Image above)
+/arch/arm64/boot/Image
+
+# generated linker scripts
+/arch/arm64/kernel/vdso/vdso.lds
+/arch/arm64/kernel/vmlinux.lds
+
+# generated headers / sources
+/lib/crc32table.h
+/lib/oid_registry_data.c
+/kernel/config_data.h
+/scripts/kconfig/zconf.hash.c
+/scripts/genksyms/keywords.hash.c
+/scripts/mod/devicetable-offsets.h
+/scripts/mod/elfconfig.h
+/security/selinux/av_permissions.h
+/security/selinux/flask.h
+/security/samsung/defex_lsm/defex_packed_rules.inc
+/security/samsung/defex_lsm/cert/pubkey_eng.der
+/security/samsung/defex_lsm/cert/pubkey_user.der
+
+# firmware blobs generated from *.ihex at build time
+/firmware/epen/w9018_r7.fw
+/firmware/epen/w9018_r7_garage.fw
+/firmware/exynos9810_acpm_tmu.fw
+/firmware/tsp_melfas/mss100_r7.fw
+
+# host tool binaries built during the kernel build
+/arch/x86/tools/relocs
+/lib/gen_crc32table
+/scripts/asn1_compiler
+/scripts/basic/bin2c
+/scripts/basic/fixdep
+/scripts/dtc/dtc
+/scripts/genksyms/genksyms
+/scripts/kallsyms
+/scripts/kconfig/conf
+/scripts/mod/mk_elfconfig
+/scripts/mod/modpost
+/scripts/selinux/genheaders/genheaders
+/scripts/selinux/mdp/mdp
+/scripts/sortextable
+/scripts/rkp_cfp/tmp/
+/security/samsung/defex_lsm/pack_rules
+/usr/gen_init_cpio
