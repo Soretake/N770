@@ -207,3 +207,22 @@ voltages stock.
 - Artifacts: `oc-build/Image-2652`, `oc-build/Image.gz-2652`,
   `oc-build/exynos9810-2652.dtb`, `oc-build/N770-OC-2652-AnyKernel3.zip`,
   `oc-build/SHA256SUMS-2652`. Next and final rung: `2704000`.
+
+---
+
+## 9. 2704 MHz build (step 4 — top of the ECT ladder)
+
+Final rung = **2704 MHz** (`0x294280`), the maximum OPP in the Exynos 9810 ECT
+table and the Galaxy S9 (G960/G965) stock big-cluster max on the same silicon
+and the same voltages. Same three limiter overrides, voltages stock.
+
+- `N770_OC_BIG_MAX_KHZ` `2652000u → 2704000u`.
+- DT domain@1 `max-freq`/`policy-max` → `0x294280`; hotplug
+  `dual`/`triple`/`quad_freq` → `0x294280`; UFC `max-limit` masters ≥ 2704 MHz
+  clamp to `0x294280`.
+- Artifacts: `oc-build/Image-2704`, `oc-build/Image.gz-2704`,
+  `oc-build/exynos9810-2704.dtb`, `oc-build/N770-OC-2704-AnyKernel3.zip`,
+  `oc-build/SHA256SUMS-2704`.
+
+This is the ceiling — there is no higher real OPP. The full ladder
+(2314/2496/2652/2704) is now built and committed; all earlier artifacts remain.

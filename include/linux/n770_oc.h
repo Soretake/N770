@@ -30,8 +30,8 @@
 #ifndef _LINUX_N770_OC_H
 #define _LINUX_N770_OC_H
 
-/* Big-cluster overclock ceiling, in kHz. Ladder: 2314/2496 validated; now 2652000. */
-#define N770_OC_BIG_MAX_KHZ	2652000u
+/* Big-cluster overclock ceiling, in kHz. Top of the ECT ladder: 2704000 (S9 max). */
+#define N770_OC_BIG_MAX_KHZ	2704000u
 
 /* cpufreq cal-id of the big (M3) cluster - used to gate the override. */
 #define N770_OC_BIG_CAL_ID	0x0b040003u
