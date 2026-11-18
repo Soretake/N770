@@ -191,3 +191,19 @@ Artifacts (kept separate from the 2314 set so both can be pulled):
 The 2314 artifacts remain at `oc-build/Image`, `oc-build/exynos9810.dtb`,
 `oc-build/N770-OC-2314-AnyKernel3.zip` (source state for 2314 is git commit
 `3787818c1`). Next rung after validating 2496: `2652000` then `2704000`.
+
+---
+
+## 8. 2652 MHz build (step 3)
+
+Next rung up (owner cooling the SoC to ~33 °C under load, so thermals are a
+non-issue). Ceiling → **2652 MHz** (`0x287760`). Same three limiter overrides,
+voltages stock.
+
+- `N770_OC_BIG_MAX_KHZ` `2496000u → 2652000u`.
+- DT domain@1 `max-freq`/`policy-max` → `0x287760`; hotplug
+  `dual`/`triple`/`quad_freq` → `0x287760`; UFC `max-limit` masters ≥ 2652 MHz
+  clamp to `0x287760`.
+- Artifacts: `oc-build/Image-2652`, `oc-build/Image.gz-2652`,
+  `oc-build/exynos9810-2652.dtb`, `oc-build/N770-OC-2652-AnyKernel3.zip`,
+  `oc-build/SHA256SUMS-2652`. Next and final rung: `2704000`.
