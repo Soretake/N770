@@ -22,6 +22,7 @@
 
 #include <soc/samsung/exynos-cpu_hotplug.h>
 #include <soc/samsung/cal-if.h>
+#include <linux/n770_oc.h>
 
 #include <trace/events/power.h>
 
@@ -1104,6 +1105,23 @@ static int __init exynos_hpgov_parse_dt(void)
 	if (of_property_read_u32(np, "quad_freq", &freq))
 		goto exit;
 	exynos_hpgov.maxfreq_table[QUAD] = min(freq, max_freq);
+
+	/*
+	 * N770 OC: stock caps the 2-/3-/4-big-core modes at 2314/1794/1794 MHz.
+	 * Raise DUAL/TRIPLE/QUAD to the OC ceiling (bounded by the ECT max which
+	 * is max_freq == maxfreq_table[SINGLE]). This is THE limiter that
+	 * re-clamps multi-core benchmark loads back to 1794 MHz.
+	 */
+	{
+		int oc = min((int)N770_OC_BIG_MAX_KHZ, max_freq);
+
+		if (exynos_hpgov.maxfreq_table[DUAL] < oc)
+			exynos_hpgov.maxfreq_table[DUAL] = oc;
+		if (exynos_hpgov.maxfreq_table[TRIPLE] < oc)
+			exynos_hpgov.maxfreq_table[TRIPLE] = oc;
+		if (exynos_hpgov.maxfreq_table[QUAD] < oc)
+			exynos_hpgov.maxfreq_table[QUAD] = oc;
+	}
 
 	exynos_hpgov.maxfreq_table[DISABLE] = exynos_hpgov.maxfreq_table[QUAD];
 

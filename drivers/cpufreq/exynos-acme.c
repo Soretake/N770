@@ -26,6 +26,7 @@
 #include <soc/samsung/exynos-cpu_hotplug.h>
 
 #include "exynos-acme.h"
+#include <linux/n770_oc.h>
 
 /*
  * list head of cpufreq domain
@@ -787,6 +788,13 @@ static __init void set_policy(struct exynos_cpufreq_domain *domain)
 
 	if (of_property_read_u32(domain->dn, "policy-max", &max))
 		return;
+
+	/*
+	 * N770 OC: lift the initial policy->max for the big (M3) cluster so the
+	 * higher OPPs are reachable. Bounded by domain->max_freq (ECT) anyway.
+	 */
+	if (domain->cal_id == N770_OC_BIG_CAL_ID && max < (int)N770_OC_BIG_MAX_KHZ)
+		max = (int)N770_OC_BIG_MAX_KHZ;
 
 	policy = cpufreq_cpu_get_raw(cpumask_first(&domain->cpus));
 	if (policy)

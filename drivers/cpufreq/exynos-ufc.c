@@ -22,6 +22,7 @@
 #include <soc/samsung/exynos-cpu_hotplug.h>
 
 #include "exynos-acme.h"
+#include <linux/n770_oc.h>
 
 /*********************************************************************
  *                          SYSFS INTERFACES                         *
@@ -675,6 +676,18 @@ static int __init init_ufc_table_dt(struct exynos_cpufreq_domain *domain,
 				}
 				if (freq >= table[c_index].master_freq)
 					break;
+			}
+			/*
+			 * N770 OC: the stock big-cluster max-limit table clamps
+			 * every request down to 1794 MHz. Allow the applied max
+			 * up to the OC ceiling (per-OPP, never above the ceiling).
+			 */
+			if (domain->cal_id == N770_OC_BIG_CAL_ID &&
+			    ufc->info.ctrl_type == PM_QOS_MAX_LIMIT) {
+				unsigned int want = min_t(unsigned int, freq,
+							  N770_OC_BIG_MAX_KHZ);
+				if (ufc->info.freq_table[index].limit_freq < want)
+					ufc->info.freq_table[index].limit_freq = want;
 			}
 			pr_info("Master_freq : %u kHz - limit_freq : %u kHz\n",
 					ufc->info.freq_table[index].master_freq,
