@@ -30,8 +30,8 @@
 #ifndef _LINUX_N770_OC_H
 #define _LINUX_N770_OC_H
 
-/* Big-cluster overclock ceiling, in kHz. SAFE FIRST STEP = 2314000. */
-#define N770_OC_BIG_MAX_KHZ	2314000u
+/* Big-cluster overclock ceiling, in kHz. 2314000 validated on-device; now 2496000. */
+#define N770_OC_BIG_MAX_KHZ	2496000u
 
 /* cpufreq cal-id of the big (M3) cluster - used to gate the override. */
 #define N770_OC_BIG_CAL_ID	0x0b040003u

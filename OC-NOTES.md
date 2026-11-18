@@ -164,3 +164,30 @@ boot.img before flashing so you can always restore it._
 - This build: `Image` = 30496800 bytes. See `oc-build/*.sha256` for sha256 of the
   OC `Image` / `Image.gz` / `exynos9810.dtb`, and the clean baseline for
   comparison.
+
+---
+
+## 7. 2496 MHz build (step 2)
+
+The 2314 MHz build was **confirmed working on-device** (big cluster reached
+2314 MHz under a cooled single-core load; throttles only when uncooled, as
+expected). This step raises the ceiling one rung to **2496 MHz** (`0x261600`,
+the next real ECT OPP). Nothing else changed — same three limiter patches, same
+toolchain/build flow, voltages untouched (stock S9 values).
+
+Edits vs the 2314 build:
+- `include/linux/n770_oc.h`: `N770_OC_BIG_MAX_KHZ` `2314000u → 2496000u`.
+- `exynos9810.dts` domain@1: `max-freq`/`policy-max` `0x234f10 → 0x261600`.
+- `exynos9810.dts` hotplug_governor: `dual_freq`/`triple_freq`/`quad_freq`
+  all `→ 0x261600`.
+- `exynos9810.dts` UFC `max-limit`: masters ≥ 2496 MHz now clamp to `0x261600`;
+  2314/2158/2002/1924 map to themselves.
+
+Artifacts (kept separate from the 2314 set so both can be pulled):
+- `oc-build/Image-2496` — raw OC kernel (sha256 in `oc-build/SHA256SUMS-2496`).
+- `oc-build/Image.gz-2496`, `oc-build/exynos9810-2496.dtb`.
+- `oc-build/N770-OC-2496-AnyKernel3.zip` — flashable zip.
+
+The 2314 artifacts remain at `oc-build/Image`, `oc-build/exynos9810.dtb`,
+`oc-build/N770-OC-2314-AnyKernel3.zip` (source state for 2314 is git commit
+`3787818c1`). Next rung after validating 2496: `2652000` then `2704000`.
