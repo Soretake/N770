@@ -9,6 +9,7 @@
 
 #include "fvmap.h"
 #include "cmucal.h"
+#include <linux/n770_oc.h>
 #include "vclk.h"
 #include "ra.h"
 
@@ -407,6 +408,33 @@ static void fvmap_copy_from_sram(void __iomem *map_base, void __iomem *sram_base
 		for (j = 0; j < fvmap_header[i].num_of_lv; j++) {
 			new->table[j].rate = old->table[j].rate;
 			new->table[j].volt = old->table[j].volt;
+
+			/*
+			 * N770 OC: per-OPP overvolt for the top two big-cluster
+			 * OPPs only. Modify the SRAM table (old) so ACPM applies
+			 * it (same mechanism as check_percent_margin above), and
+			 * mirror into new so sysfs reports the real value.
+			 */
+			if (vclk->margin_id == MARGIN_BIG) {
+				unsigned int extra = 0;
+
+				if (old->table[j].rate == N770_OC_CL1_OV_2652_KHZ)
+					extra = N770_OC_CL1_OV_2652_UV;
+				else if (old->table[j].rate == N770_OC_CL1_OV_2704_KHZ)
+					extra = N770_OC_CL1_OV_2704_UV;
+
+				if (extra) {
+					unsigned int nv = old->table[j].volt + extra;
+
+					if (nv > N770_OC_CL1_VMAX_UV)
+						nv = N770_OC_CL1_VMAX_UV;
+					old->table[j].volt = nv;
+					new->table[j].volt = nv;
+					pr_info("N770 OC: CL1 %u kHz overvolt -> %u uV\n",
+						old->table[j].rate, nv);
+				}
+			}
+
 			pr_info("  lv : [%7d], volt = %d uV (%d %%) \n",
 				new->table[j].rate, new->table[j].volt,
 				volt_offset_percent);

@@ -36,4 +36,24 @@
 /* cpufreq cal-id of the big (M3) cluster - used to gate the override. */
 #define N770_OC_BIG_CAL_ID	0x0b040003u
 
+/*
+ * ===== Per-OPP overvolt for the top two big-cluster OPPs =====
+ * ASV bin 8 (this chip's CL1 bin) runs out of stock-voltage headroom above
+ * 2496 MHz: 2652 MHz was unstable at stock. These add a fixed offset (in uV)
+ * to ONLY the 2652/2704 MHz entries of the big-cluster rate-voltage table, in
+ * drivers/soc/samsung/cal-if/fvmap.c (fvmap_copy_from_sram). Applied on top of
+ * whatever absolute voltage the ECT/ASV provides at runtime for this bin, then
+ * clamped to N770_OC_CL1_VMAX_UV. 2314/2496 and the little cluster + GPU are
+ * untouched. Exynos voltage step = 6250 uV (6.25 mV).
+ *
+ *   >>> To retune: change these offsets (multiples of 6250 uV). <<<
+ *   If 2704 still faults, raise N770_OC_CL1_OV_2704_UV one or two steps
+ *   (+6250/+12500); if a value is too high / wastes power, lower it.
+ */
+#define N770_OC_CL1_OV_2652_KHZ	2652000u
+#define N770_OC_CL1_OV_2704_KHZ	2704000u
+#define N770_OC_CL1_OV_2652_UV	50000u		/* +50 mV  (8 steps)  on 2652 MHz */
+#define N770_OC_CL1_OV_2704_UV	75000u		/* +75 mV (12 steps)  on 2704 MHz */
+#define N770_OC_CL1_VMAX_UV	1300000u	/* hard safety clamp (1.300 V) - never exceed */
+
 #endif /* _LINUX_N770_OC_H */

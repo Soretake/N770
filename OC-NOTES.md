@@ -226,3 +226,60 @@ and the same voltages. Same three limiter overrides, voltages stock.
 
 This is the ceiling — there is no higher real OPP. The full ladder
 (2314/2496/2652/2704) is now built and committed; all earlier artifacts remain.
+
+---
+
+## 10. OVERVOLT build (2704ov) — per-OPP voltage bump for the top two OPPs
+
+On-device: 2314 and 2496 are rock-solid at **stock** voltage; **2652 was
+unstable** (reboot + AnTuTu compute crash) and 2704 untested. This chip's ASV
+bins (`/sys/kernel/debug/asv_summary`): **CL1 (big) = bin 8**, G3D = 8, CL0 = 10
+— the big cluster is mid-bin, so its stock voltage runs out above 2496 MHz.
+
+This build keeps the **2704 MHz** ceiling and adds a **per-OPP overvolt on only
+the top two big-cluster OPPs**. 2314/2496, the little cluster and the GPU are
+untouched, and voltages are **not** lowered anywhere.
+
+### Where the CL1 per-OPP voltages live
+`drivers/soc/samsung/cal-if/fvmap.c`, function `fvmap_copy_from_sram()`. The
+rate/voltage table is `struct rate_volt { u32 rate /*kHz*/; u32 volt /*uV*/; }`
+(`fvmap.h`), one per OPP, materialised at boot from the ECT-populated SRAM map.
+The big cluster is the domain whose `vclk->margin_id == MARGIN_BIG`. We modify
+the **SRAM** copy (`old->table[j].volt`) — the same thing the stock
+`check_percent_margin()` does, so ACPM actually applies it — and mirror the
+value into `new` so sysfs reports it. Edit: the `for (j ...)` copy loop, gated
+on `MARGIN_BIG` and the two rates.
+
+### Offsets (defined in `include/linux/n770_oc.h`)
+Exynos voltage step = **6250 µV (6.25 mV)**.
+
+| OPP | stock voltage | offset | applied voltage |
+|-----|---------------|--------|-----------------|
+| 2652000 kHz | ECT/ASV bin-8 value `Vst_2652` | **+50 mV** (`N770_OC_CL1_OV_2652_UV`, 8 steps) | `Vst_2652 + 50 mV` |
+| 2704000 kHz | ECT/ASV bin-8 value `Vst_2704` | **+75 mV** (`N770_OC_CL1_OV_2704_UV`, 12 steps) | `Vst_2704 + 75 mV` |
+
+The **absolute** stock mV is produced by the ECT + ASV at runtime (bin-dependent,
+not a constant in this source), so the patch applies a **relative** offset and
+clamps the result to **`N770_OC_CL1_VMAX_UV` = 1.300 V** (hard safety ceiling —
+never exceeded). The actual applied voltages are printed to the kernel log at
+boot: `dmesg | grep "N770 OC: CL1"` → `CL1 2652000 kHz overvolt -> <uV>` and the
+2704 line; you can also read the full big-cluster table from the ASV/fvmap debug
+nodes. **Report back those two dmesg values** to pin down the absolute mV.
+
+### Retuning (next iteration)
+Edit the two offsets in `include/linux/n770_oc.h` (keep them multiples of 6250)
+and rebuild with `./build_oc.sh`:
+- If **2704 still faults**, raise `N770_OC_CL1_OV_2704_UV` by one or two steps
+  (`56250` → +56.25 mV, `62500` → +62.5 mV …). Do the same for 2652 if needed.
+- If a rail is clearly over-volted (wasting power / extra heat), lower it a step.
+- To validate the **2652 overvolt independently** when 2704 still faults:
+  `echo 2652000 > /sys/devices/system/cpu/cpufreq/policy4/scaling_max_freq`
+  (runtime-cap to 2652) and stress-test; if stable, the 2652 overvolt is good
+  and only 2704 needs more.
+
+### Artifacts
+`oc-build/Image-2704ov`, `oc-build/Image.gz-2704ov`,
+`oc-build/N770-OC-2704ov-AnyKernel3.zip`, `oc-build/SHA256SUMS-2704ov`. DTB is
+identical to the plain 2704 build (`oc-build/exynos9810-2704.dtb`) — the overvolt
+is kernel-code only. All earlier (2314/2496/2652/2704 stock-volt) artifacts
+remain intact.
